@@ -1,30 +1,89 @@
-import machine
 import socket
 import uselect
-from machine import Pin
-from time import sleep
-MATRICULAS = []
+from machine import Pin ,reset
+from time import sleep, time
+from os import listdir, remove
+
+
+import network
+w = network.WLAN(network.STA_IF)
+w.active(True)
+w.connect('LAR','LAR@1480')
+
+press = time()
+
+time_to_reset = time()
+
+status_porta = True
+
+MATRICULAS = ["2015014955","20160108682","2016092508","2016045211","2013083425", "20160142657","2015016753", "20160154059", "20180002125","2015083425","2015083925", "20160154068", "1943220","20150125545","2013043063","20170009098","20180131409","20170036872",
+"20170030476","20170043939","2010045211","2014056736","20160106641","2016092286","1170845","2614800","2836616","24595049","20170031830","20170034555","2016017693",
+                              "20180009510","2015081902","20180037336","20170010212"]
+
+
+# seting ports for using                         
 botao = Pin(12, Pin.IN,Pin.PULL_UP)
 rele = Pin(15,Pin.OUT)
 led_verde = Pin(13,Pin.OUT)
 led_red = Pin(16,Pin.OUT)
+
 #função que libera a porta
-def porta_abrir(status):
+def door(status):
+    """
+    this method just chang the led's pins value and rele's pin.
+    """
     try:
         rele.value(status)
-        led_red.value(not(status))    
+        led_red.value(not(status))
+        led_verde.value(status)    
     except :
-        print('porta abrir')
-#função que libera porta pelo botao
-def botao_abrir():
+        print('error in method door')
+
+def porteiro(tempo):
+    """
+    this method compare which the last time the door() was
+     used and wich is the status_porta for so att the status_porta
+    """
+    global press,status_porta
+    elapsed = time() - press
     try:
-        if botao.value():
-            porta_abrir(0)        
+        if elapsed > tempo and status_porta:
+            door(0)
+            status_porta = False
+            print('fechar')
+        elif elapsed < tempo and not status_porta:
+            door(1)
+            status_porta = True
+            print('abrir')
         else:
-            porta_abrir(1)        
+            print('e ai?')
+
     except :
-        print('nop')
+        print('error > porteiro')
+
+
+def openDoor():
+    press = time()
+    print('press att')
+
+
+#função que libera porta pelo botao
+def pushButton():
+    try:
+        if not(botao.value()):
+            openDoor()
+        else:
+            pass
+    except :
+        print('troble pushButton')
         pass
+
+def manutencao():
+    door(1)
+    input('press keyboard for restart loop')
+    main()
+
+
 
 html = b'HTTP/1.0 200 OK\r\n Content-Type:text/html; charset=UTF-8\r\n\r\n'+"""<!DOCTYPE html>
 <html>
@@ -46,34 +105,55 @@ poller.register(s, uselect.POLLIN)
 s.bind(addr)
 s.listen(1)
 print('listening on', addr)
-while True:
-    botao_abrir()
-    print('in loop')
-    res = poller.poll(300)
-    if not res:
-        print('not rcv')
-    else:
-        cl, addr = s.accept()
-        request = cl.recv(1023)        
-        response = html+'\n'
-        cl.send(response)
-        cl.close()
 
-        request = str(request).split('/')[1]
-        print(request)
-        request = request.split(" ")[0]
-        print('new request')
-        matricula = request.split("=")
+def main():
 
-        if len(matricula) > 1:
-            print('matricula', matricula) 
-            if matricula[1] in MATRICULAS :
-                print('abriu')
-                porta_abrir(1)
-                sleep(3)
+    global time_to_reset
+    loop = True
+
+    while loop:
+        #reseta o esp para previnir bugs
+        if (time() - time_to_reset > (15*60)):
+            reset()
+            time_to_reset = time()
+
+        porteiro(2)
+        pushButton()
+        
+        try:
+            res = poller.poll(30)
+            if not res:
+                pass
             else:
-                print ('sorry baby!' ,request.split(" ")[0])
-                porta_abrir(0)
-        else:
-            print('iji')
-            pass
+                cl, addr = s.accept()
+                request = cl.recv(1023)        
+                response = html+'\n'
+                cl.send(response)
+                cl.close()
+
+                request = str(request).split('/')[1]
+                print(request)
+                request = request.split(" ")[0]
+                print('new request')
+                matricula = request.split("=")
+
+                if len(matricula) > 1:
+                    print('matricula', matricula) 
+                    if matricula[1] in MATRICULAS :
+                        openDoor()                        
+                    else:
+                        print ('sorry baby!' ,request.split(" ")[0])
+                else:
+                    print('iji')
+                    pass
+        except:
+            x = input('enter comand [d = reset, x = exit loop, m = aberta permanente] >>')
+            if x == 'd':
+                reset()
+            elif x == 'x':
+                print('X')
+                loop = False
+            elif x == 'm':
+                manutencao()
+sleep(5)
+main()
