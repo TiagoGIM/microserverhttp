@@ -1,4 +1,4 @@
-from time import sleep, time
+import time
 from machine import Pin,reset
 from botaoWeb import*
 
@@ -6,26 +6,26 @@ class Porteiro(BotaoWeb):
     kind = 'Classe principal da porta'
 
     def __init__(self,port,host):
-
         BotaoWeb.__init__(self,port,host)
         # self.porteiroWeb = BotaoWeb(port,host)
 
-        self.botao = Pin(12, Pin.IN,Pin.PULL_UP)
-        self.rele = Pin(15,Pin.OUT)
-        self.led_verde = Pin(13,Pin.OUT)
-        self.led_red = Pin(16,Pin.OUT)
+        self.botao = Pin(4, Pin.IN,Pin.PULL_UP) #change pin for pin 12
+        self.rele = Pin(13,Pin.OUT) #15
+        self.led_verde = Pin(12,Pin.OUT)
+        self.led_red = Pin(15,Pin.OUT)
 
         #variable for checking wich the last time the port was acionated
-        self.press = time()
+        self.press = time.time()
         self.status_porta = True
         #usada pra resetar o esp de tempos em tempos, para previnir crash no sistema
-        self.time_to_reset_esp = time()
-        self.tags = []
-        self.MATRICULAS = []
+        self.time_to_reset_esp = time.time()
 
-    def idsSetting(self, matricula, tags,who=0):
+        self.tags = []
+        self.matriculas = []
+
+    def idsSetting(self, matricula, tags = None,who=0):
         if who == 0:
-            self.MATRICULAS = matricula
+            self.matriculas = matricula
         else:
             self.tags = tags
 
@@ -41,7 +41,7 @@ class Porteiro(BotaoWeb):
             print('error in method door')
 
     def openDoor(self):
-        self.press = time()
+        self.press = time.time()
         print('"press" att')
 
     def pushButton(self):
@@ -58,7 +58,7 @@ class Porteiro(BotaoWeb):
         this method compare which the last time the door() was
         used and wich is the status_porta for so att the status_porta
         """
-        elapsed = time() - self.press
+        elapsed = time.time() - self.press
         try:
             if elapsed > tempo and self.status_porta:
                 self.door(0)
@@ -70,7 +70,6 @@ class Porteiro(BotaoWeb):
                 print('abrir')
             else:
                 print('e ai?')
-
         except :
             print('error >> porteiro()')
 
@@ -81,27 +80,25 @@ class Porteiro(BotaoWeb):
 
     def preventBughu3hu3(self, time_for_reset):
         "this method just "
-        if (time() - self.time_to_reset_esp > (time_for_reset)):
+        if (time.time() - self.time_to_reset_esp > (time_for_reset)):
             reset() #reset esp
-            self.time_to_reset_esp = time()
+            self.time_to_reset_esp = time.time()
         else:
             pass
 
-
     def run(self):
-
         loop = True
-
         while loop:
+
             self.preventBughu3hu3(15*60)
             self.porteiro(2)
-            self.pushButton()
-            
+            self.pushButton()           
             
             try:
-                self.botaoWeb(self.openDoor(),self.MATRICULAS)
-             
-            except:
+                self.botaoWeb(self.openDoor,self.matriculas)
+
+            except :
+
                 x = input('enter comand [d = reset, x = exit loop, m = aberta permanente] >>')
                 if x == 'd':
                     reset()

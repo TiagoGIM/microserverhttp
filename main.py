@@ -8,7 +8,7 @@ from os import listdir, remove
 import network
 w = network.WLAN(network.STA_IF)
 w.active(True)
-w.connect('LAR','LAR@1480')
+w.connect('','')
 
 press = time()
 

@@ -1,18 +1,14 @@
 import socket 
 import uselect
-
-#addr = socket.getaddrinfo('0.0.0.0', 8012)[0][-1]
-#s = socket.socket()
-#s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-
-# s.bind(addr)
-# s.listen(1)
+import network
+import time
 
 class BotaoWeb:
     kind = 'Classe do botao virtual'
 
     def __init__(self, port, host):
+        self.w = network.WLAN(network.STA_IF)
+        self.w.active(True)
         self.port = port
         self.host = host
         self.poller = uselect.poll()
@@ -29,7 +25,12 @@ class BotaoWeb:
                 </body>
             </html>
             """
-
+    
+    def networkIp(self):        
+        print(self.w.ifconfig())
+        
+    def test(self):
+        print('carai')
     def setConnection(self):
         self.addr = socket.getaddrinfo(self.port, self.host)[0][-1]
         self.s = socket.socket()
@@ -40,7 +41,8 @@ class BotaoWeb:
         print('listening on', self.addr)
 
 
-    def botaoWeb(self,func, MATRICULAS):
+    def botaoWeb(self,func, matriculas):
+        m = matriculas
         res = self.poller.poll(30)
         if not res:
             pass
@@ -56,13 +58,17 @@ class BotaoWeb:
             request = request.split(" ")[0]
             print('new request')
             matricula = request.split("=")
-
             if len(matricula) > 1:
-                print('matricula', matricula) 
-                if matricula[1] in MATRICULAS :
-                    func()                        
-                else:
-                    print ('sorry baby!' ,request.split(" ")[0])
+                print('matricula', matricula)
+                try:
+                    if matricula[1] in m :
+                        print('match')
+                        func()                        
+                    else:
+                        print ('sorry baby!' ,request.split(" ")[0])
+                except ValueError as err:
+                    print(err)
+
             else:
                 print('iji')
                 pass
