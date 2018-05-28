@@ -77,3 +77,12 @@ while True:
         else:
             print('iji')
             pass
+
+
+# Teste do RFID
+# from rfidPorteiro import RfidPorteiro
+# rf = RfidPorteiro()
+# tags = ["521252194","212516444","211595197"]
+# while(True):
+#     rf.get(tags)
+#     print(rf.get(tags))
