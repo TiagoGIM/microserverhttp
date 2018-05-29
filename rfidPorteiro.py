@@ -7,7 +7,7 @@ class RfidPorteiro:
         print ("Rfid ativo")
 
     def get(self):
-        tag = "12345"
+        tag = "SemTag"
         (stat, tag_type) = rdr.request(rdr.REQIDL)
 
         if stat == rdr.OK:
@@ -15,12 +15,11 @@ class RfidPorteiro:
             (stat, raw_uid) = rdr.anticoll()
 
             if stat == rdr.OK:
-                print("New card detected")
+                print("Card detected: ")
                 print(str(raw_uid[0])+ str(raw_uid[1]) + str(raw_uid[2])+ str(raw_uid[3]))
                 print("")
                 if rdr.select_tag(raw_uid) == rdr.OK:
                     tag = str(raw_uid[0])+ str(raw_uid[1]) + str(raw_uid[2])+ str(raw_uid[3])
-                    print("Lido")
                 else:
                     print("Failed to select tag")
         return tag
