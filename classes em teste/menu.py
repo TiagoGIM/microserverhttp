@@ -6,4 +6,4 @@ class Menu(Trava):
     def manutencao(self):
         self.door(1)
         input('press keyboard for restart loop')
-        print("run()")
+        self.door(0)

@@ -16,7 +16,7 @@ class Trava():
         this method just chang the led's pins value and rele's pin.
         """
         try:
-            self.rele.value(status)
+            self.rele.value(not(status))
             self.led_red.value(not(status))
             self.led_verde.value(status)    
         except :

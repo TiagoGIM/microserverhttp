@@ -72,7 +72,7 @@ class Porteiro(BotaoWeb,Trava, Menu):
     def run(self):
         loop = True
         while loop:
-            self.preventBughu3hu3(5*60)
+            #self.preventBughu3hu3(5*60)
             try:
                 
                 self.porteiro(2)
@@ -81,17 +81,15 @@ class Porteiro(BotaoWeb,Trava, Menu):
                 gc.collect()
 
             except KeyboardInterrupt:
-
-                x = input('enter comand [i = print ip network, d = reset, x = exit loop, m = aberta permanente] >>')
-                if x == 'd':
-                    reset()
-                elif x == 'x':
-                    loop = False
-                elif x == 'm':
-                    self.manutencao()                        
-                elif x == 'i':
-                    try:
+                try:
+                    x = input('enter comand [i = print ip network, d = reset, x = exit loop, m = aberta permanente] >>')
+                    if x == 'd':
+                        reset()
+                    elif x == 'x':
+                        loop = False
+                    elif x == 'm':
+                        self.manutencao()                    
+                    elif x == 'i':                
                         self.networkIp()
-                    except:
-                        print ('no recognized networkIp()')
-
+                except :
+                    print('iji')

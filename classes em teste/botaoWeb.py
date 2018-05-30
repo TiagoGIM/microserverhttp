@@ -41,53 +41,54 @@ class BotaoWeb(Datapages):
         print('listening on', self.addr)
 
     def botaoWeb(self,func,m):
-        #try:
+        
             res = self.poller.poll(30)
             if not res:
                 pass
             else:
-                cl, addr = self.s.accept()
-                request = cl.recv(1023)                
-                method , request = self.tratamentoGet(request)
+                try:
+                    cl, addr = self.s.accept()
+                    request = cl.recv(1023)                
+                    method , request = self.tratamentoGet(request)
 
-                if method == 'GET':
-                    if request:
-                        response = self.msgWeb+'\n'
-                        if request =='/':
-                            print('send response page home')                        
-                            cl.send(response)
-                            cl.close()
-                        elif request.find("Matricula") > 0:
-                            matricula = request.split("=")
-                            if len(matricula) > 1:                
-                                print('matricula', matricula)
-                                try:
-                                    if matricula[1] in m :
-                                        print('match')
-                                        func()
-                                        print('enviar html porta aberta')
-                                        cl.send(response)
-                                        cl.close()                        
-                                    else:
-                                        print ('sorry baby!' ,request.split(" ")[1])
-                                        cl.send(response)
-                                        cl.close()
+                    if method == 'GET':
+                        if request:
+                            response = self.msgWeb+'\n'
+                            if request =='/':
+                                print('send response page home')                        
+                                cl.send(response)
+                                cl.close()
+                            elif request.find("Matricula") > 0:
+                                matricula = request.split("=")
+                                if len(matricula) > 1:                
+                                    print('matricula', matricula)
+                                    try:
+                                        if matricula[1] in m :
+                                            print('match')
+                                            func()
+                                            print('enviar html porta aberta')
+                                            cl.send(response)
+                                            cl.close()                        
+                                        else:
+                                            print ('sorry baby!')
+                                            cl.send(response)
+                                            cl.close()
 
-                                except ValueError as err:
-                                    print(err)
+                                    except :
+                                        pass
+                            else:
+                                print('nao "/" nem matricula enviar 404')
+                                cl.send(response)
+                                cl.close()
                         else:
-                            print('nao "/" nem matricula enviar 404')
+                            print('msg request estranho')
                             cl.send(response)
                             cl.close()
                     else:
-                        print('msg request estranho')
-                        cl.send(response)
+                        print('nao get')
                         cl.close()
-                else:
-                    print('nao get')
-                    cl.close()
-        #except:
-        #    pass
+                except:
+                    pass
 
     def tratamentoGet(self,msg):
         try:
