@@ -1,19 +1,16 @@
 import time
 from machine import Pin,reset
-from botaoWeb import*
+from botaoWeb import BotaoWeb
+from porteiroHardware import Trava
+from menu import Menu
+import gc
 
-class Porteiro(BotaoWeb):
+class Porteiro(BotaoWeb,Trava, Menu):
     kind = 'Classe principal da porta'
-
+    
     def __init__(self,port,host):
         BotaoWeb.__init__(self,port,host)
-        # self.porteiroWeb = BotaoWeb(port,host)
-
-        self.botao = Pin(4, Pin.IN,Pin.PULL_UP) #change pin for pin 12
-        self.rele = Pin(13,Pin.OUT) #15
-        self.led_verde = Pin(12,Pin.OUT)
-        self.led_red = Pin(15,Pin.OUT)
-
+        Trava.__init__(self)
         #variable for checking wich the last time the port was acionated
         self.press = time.time()
         self.status_porta = True
@@ -29,30 +26,20 @@ class Porteiro(BotaoWeb):
         else:
             self.tags = tags
 
-    def door(self, status):
-        """
-        this method just chang the led's pins value and rele's pin.
-        """
-        try:
-            self.rele.value(status)
-            self.led_red.value(not(status))
-            self.led_verde.value(status)    
-        except :
-            print('error in method door')
-
     def openDoor(self):
         self.press = time.time()
         print('"press" att')
 
-    def pushButton(self):
+    def botaoReal(self):
         try:
             if not(self.botao.value()):
                 self.openDoor()
             else:
                 pass
         except :
-            print('troble pushButton')
+            print('troble botaoReal')
             pass
+
     def porteiro(self, tempo):
         """
         this method compare which the last time the door() was
@@ -69,14 +56,10 @@ class Porteiro(BotaoWeb):
                 self.status_porta = True
                 print('abrir')
             else:
-                print('e ai?')
+                pass
+
         except :
             print('error >> porteiro()')
-
-    def manutencao(self):
-        self.door(1)
-        input('press keyboard for restart loop')
-        print("run()")
 
     def preventBughu3hu3(self, time_for_reset):
         "this method just "
@@ -89,21 +72,26 @@ class Porteiro(BotaoWeb):
     def run(self):
         loop = True
         while loop:
-
-            self.preventBughu3hu3(15*60)
-            self.porteiro(2)
-            self.pushButton()           
-            
+            self.preventBughu3hu3(5*60)
             try:
+                
+                self.porteiro(2)
+                self.botaoReal()        
                 self.botaoWeb(self.openDoor,self.matriculas)
+                gc.collect()
 
-            except :
+            except KeyboardInterrupt:
 
-                x = input('enter comand [d = reset, x = exit loop, m = aberta permanente] >>')
+                x = input('enter comand [i = print ip network, d = reset, x = exit loop, m = aberta permanente] >>')
                 if x == 'd':
                     reset()
                 elif x == 'x':
-                    print('X')
                     loop = False
                 elif x == 'm':
-                    self.manutencao()
+                    self.manutencao()                        
+                elif x == 'i':
+                    try:
+                        self.networkIp()
+                    except:
+                        print ('no recognized networkIp()')
+
