@@ -2,6 +2,7 @@ import socket
 import uselect
 import network
 from db import Datapages
+from time import sleep
 
 
 class BotaoWeb(Datapages):
@@ -19,9 +20,6 @@ class BotaoWeb(Datapages):
         Datapages.__init__(self,'teste')
         self.openDB()
         self.msgWeb = self.openPage('home')
-        self.dbClose()
-        self.bancoClose()
-
     
     def networkIp(self):        
         print(self.w.ifconfig())
@@ -57,7 +55,7 @@ class BotaoWeb(Datapages):
                             if request =='/':
                                 print('send response page home')                        
                                 cl.send(response)
-                                cl.close()
+                                # cl.close()
                             elif request.find("Matricula") > 0:
                                 matricula = request.split("=")
                                 if len(matricula) > 1:                
@@ -68,22 +66,30 @@ class BotaoWeb(Datapages):
                                             func()
                                             print('enviar html porta aberta')
                                             cl.send(response)
-                                            cl.close()                        
+                                            # cl.close()                        
                                         else:
                                             print ('sorry baby!')
                                             cl.send(response)
-                                            cl.close()
+                                            # cl.close()
 
                                     except :
                                         pass
+                            elif request.find("cadastro") > 0:
+                                try:
+                                    print('sending cadastro page')
+                                    cl.send(self.openPage('cadastro'))
+                                except ValueError as err:
+                                    print('fail', err)
                             else:
                                 print('nao "/" nem matricula enviar 404')
                                 cl.send(response)
-                                cl.close()
+                                # cl.close()
                         else:
                             print('msg request estranho')
                             cl.send(response)
-                            cl.close()
+                            # cl.close()
+                        sleep(1)
+                        cl.close()
                     else:
                         print('nao get')
                         cl.close()
