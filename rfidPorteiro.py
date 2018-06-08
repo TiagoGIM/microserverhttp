@@ -21,7 +21,7 @@ class RfidPorteiro:
                 if rdr.select_tag(raw_uid) == rdr.OK:
                     tag = str(raw_uid[0])+ str(raw_uid[1]) + str(raw_uid[2])+ str(raw_uid[3])
                 else:
-                    print("Failed to select tag")
+                    return tag
         return tag
 
 
