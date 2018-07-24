@@ -7,3 +7,4 @@ class Menu(Trava):
         self.door(1)
         input('press keyboard for restart loop')
         self.door(0)
+

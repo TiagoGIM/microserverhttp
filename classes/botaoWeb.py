@@ -13,9 +13,7 @@ class BotaoWeb(Datapages):
         self.w.active(True)
         self.port = port
         self.host = host
-
         self.poller = uselect.poll()
-
 
         Datapages.__init__(self,'teste')
         self.openDB()
@@ -29,18 +27,21 @@ class BotaoWeb(Datapages):
         self.s.close()  
 
     def setConnection(self):
-        self.addr = socket.getaddrinfo(self.port, self.host)[0][-1]
-        self.s = socket.socket()
-        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:   
+            self.addr = socket.getaddrinfo(self.port, self.host)[0][-1]
+            self.s = socket.socket()
+            self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.poller.register(self.s, uselect.POLLIN)
+            self.s.bind(self.addr)
+            self.s.listen(1)
+            print('listening on', self.addr)
+            return True
+        except:
+            return False
 
-        self.poller.register(self.s, uselect.POLLIN)
-        self.s.bind(self.addr)
-        self.s.listen(1)
-        print('listening on', self.addr)
-
-    def botaoWeb(self,func,m):
+    def botaoWeb(self,openDor,m):
         
-            res = self.poller.poll(30)
+            res = self.poller.poll(5)
             if not res:
                 pass
             else:
@@ -48,14 +49,25 @@ class BotaoWeb(Datapages):
                     cl, addr = self.s.accept()
                     request = cl.recv(1023)                
                     method , request = self.tratamentoGet(request)
-
                     if method == 'GET':
                         if request:
                             response = self.msgWeb+'\n'
                             if request =='/':
                                 print('send response page home')                        
                                 cl.send(response)
-                                # cl.close()
+                            elif request.find("token")> 0:
+                                token = request.split("=")
+                                if len(token) > 1:                
+                                    try:
+                                        if token[1] in m :
+                                            print('match')
+                                            openDor()
+                                            #send a msg ok!                    
+                                        else:
+                                            print ('sorry baby!')
+                                            #send a msg denned!
+                                    except :
+                                        pass
                             elif request.find("Matricula") > 0:
                                 matricula = request.split("=")
                                 if len(matricula) > 1:                
@@ -82,17 +94,14 @@ class BotaoWeb(Datapages):
                                     print('fail', err)
                             else:
                                 print('nao "/" nem matricula enviar 404')
-                                cl.send(response)
-                                # cl.close()
+                                # cl.send(response)
                         else:
                             print('msg request estranho')
-                            cl.send(response)
-                            # cl.close()
+                            # cl.send(response)
                         sleep(1)
-                        cl.close()
                     else:
                         print('nao get')
-                        cl.close()
+                    cl.close()
                 except:
                     pass
 

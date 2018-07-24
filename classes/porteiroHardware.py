@@ -21,3 +21,6 @@ class Trava():
             self.led_verde.value(status)    
         except :
             print('error in method door')
+
+    def ldc(self):
+            print('not implemented yet')

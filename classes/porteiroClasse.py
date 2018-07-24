@@ -8,8 +8,11 @@ import gc
 class Porteiro(BotaoWeb,Trava, Menu):
     kind = 'Classe principal da porta'
     
-    def __init__(self,port,host):
-        BotaoWeb.__init__(self,port,host)
+    def __init__(self,virtual):
+#qnd trava tem botao virtual
+        self.statusServer = False
+# fim da trava virtual
+
         Trava.__init__(self)
         #variable for checking wich the last time the port was acionated
         self.press = time.time()
@@ -40,6 +43,15 @@ class Porteiro(BotaoWeb,Trava, Menu):
             print('troble botaoReal')
             pass
 
+#seting botao web
+    def startServerButton(self,port,host):
+        self.serverWeb = BotaoWeb(port,host)        
+        self.statusServer = self.serverWeb.setConnection()
+
+    def botaoVirtual(self):        
+        self.serverWeb.botaoWeb(self.openDoor,self.matriculas)
+#fim botaoWeb
+
     def porteiro(self, tempo):
         """
         this method compare which the last time the door() was
@@ -60,7 +72,6 @@ class Porteiro(BotaoWeb,Trava, Menu):
 
         except :
             print('error >> porteiro()')
-
     def preventBughu3hu3(self, time_for_reset):
         "this method just "
         if (time.time() - self.time_to_reset_esp > (time_for_reset)):
@@ -68,28 +79,35 @@ class Porteiro(BotaoWeb,Trava, Menu):
             self.time_to_reset_esp = time.time()
         else:
             pass
+    def menuUser(self):
+        x = input('enter comand [i = print ip network, d = reset, x = exit loop, m = aberta permanente] >>')
+        if x == 'd':
+            reset()
+        elif x == 'x':
+            self.loop = False
+        elif x == 'm':
+            self.manutencao()                    
+        elif x == 'i':
+            if self.statusServer:                
+                self.serverWeb.networkIp()
+            else:
+                print('server its not enabled.')
+        else:
+            pass
 
     def run(self):
-        loop = True
-        while loop:
+        self.loop = True 
+        while self.loop:
             #self.preventBughu3hu3(5*60)
             try:
-                
+                #2 = tempo para fechar a porta                 
                 self.porteiro(2)
-                self.botaoReal()        
-                self.botaoWeb(self.openDoor,self.matriculas)
+                self.botaoReal()
+                if self.statusServer:
+                    self.botaoVirtual()
                 gc.collect()
-
             except KeyboardInterrupt:
                 try:
-                    x = input('enter comand [i = print ip network, d = reset, x = exit loop, m = aberta permanente] >>')
-                    if x == 'd':
-                        reset()
-                    elif x == 'x':
-                        loop = False
-                    elif x == 'm':
-                        self.manutencao()                    
-                    elif x == 'i':                
-                        self.networkIp()
+                    self.menuUser()
                 except :
                     print('iji')
