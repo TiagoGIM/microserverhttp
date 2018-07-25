@@ -1,16 +1,21 @@
 import socket 
 import uselect
 import network
-from db import Datapages
+from classes.db import Datapages
 from time import sleep
 
 
 class BotaoWeb(Datapages):
     kind = 'Classe do botao virtual'
 
-    def __init__(self, port, host):
+    def __init__(self, port, host,wf_configs):
+        #wifi settings
+        print('setuping wifi...')
+        self.rede = wf_configs['ssid']
+        self.senha = wf_configs['pw']
         self.w = network.WLAN(network.STA_IF)
         self.w.active(True)
+        #socket config
         self.port = port
         self.host = host
         self.poller = uselect.poll()
@@ -27,7 +32,8 @@ class BotaoWeb(Datapages):
         self.s.close()  
 
     def setConnection(self):
-        try:   
+        try:
+            self.connect_wifi()#connecta na wifi   
             self.addr = socket.getaddrinfo(self.port, self.host)[0][-1]
             self.s = socket.socket()
             self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -75,7 +81,7 @@ class BotaoWeb(Datapages):
                                     try:
                                         if matricula[1] in m :
                                             print('match')
-                                            func()
+                                            openDor()
                                             print('enviar html porta aberta')
                                             cl.send(response)
                                             # cl.close()                        
@@ -83,7 +89,6 @@ class BotaoWeb(Datapages):
                                             print ('sorry baby!')
                                             cl.send(response)
                                             # cl.close()
-
                                     except :
                                         pass
                             elif request.find("cadastro") > 0:
@@ -123,4 +128,15 @@ class BotaoWeb(Datapages):
         except:
             return False, False
 
+    def connect_wifi(self):
+        self.w.connect(self.rede,self.senha)
+        print('try connect in '+self.rede)
+        #exibe status de conexão
+        print(self.w.isconnected())
+        #exibe ip
+        print(self.w.ifconfig())
+        #returna se foi connectado
+        return self.w.isconnected()
 
+    def reconnect(self):
+        self.connect_wifi()

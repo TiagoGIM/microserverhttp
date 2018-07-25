@@ -1,14 +1,15 @@
 import time
 from machine import Pin,reset
-from botaoWeb import BotaoWeb
-from porteiroHardware import Trava
-from menu import Menu
+from classes.botaoWeb import BotaoWeb
+from classes.porteiroHardware import Trava
+from classes.menu import Menu
 import gc
 
 class Porteiro(BotaoWeb,Trava, Menu):
     kind = 'Classe principal da porta'
     
     def __init__(self,virtual):
+        print('init Porteiro main')
 #qnd trava tem botao virtual
         self.statusServer = False
 # fim da trava virtual
@@ -24,6 +25,7 @@ class Porteiro(BotaoWeb,Trava, Menu):
         self.matriculas = []
 
     def idsSetting(self, matricula, tags = None,who=0):
+        #load ids enabled for acess the door
         if who == 0:
             self.matriculas = matricula
         else:
@@ -44,8 +46,9 @@ class Porteiro(BotaoWeb,Trava, Menu):
             pass
 
 #seting botao web
-    def startServerButton(self,port,host):
-        self.serverWeb = BotaoWeb(port,host)        
+    def startServerButton(self,port,host,wifi_setings):
+        print('starting webButton')
+        self.serverWeb = BotaoWeb(port,host,wifi_setings)        
         self.statusServer = self.serverWeb.setConnection()
 
     def botaoVirtual(self):        

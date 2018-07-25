@@ -1,4 +1,4 @@
-from db import*
+from classes.db import*
 page = Datapages('teste')
 page.openDB()
 home = """<!DOCTYPE html>
@@ -148,3 +148,4 @@ cadastro = """<!DOCTYPE html>
 page.addPage('cadastro',cadastro)
 
 page.addPage('home',home)
+print('fim')

@@ -4,8 +4,8 @@ class Trava():
 
     def __init__(self):
 
-        #self.PINS = [4,13,12,15] #teste no wity
-        self.PINS = [12,15,13,16]
+        self.PINS = [4,13,12,15] #teste no wity
+        #self.PINS = [12,15,13,16]
         self.botao = Pin(self.PINS[0], Pin.IN,Pin.PULL_UP) #change pin for pin 12, teste [4,13,12,15]
         self.rele = Pin(self.PINS[1],Pin.OUT) #15
         self.led_verde = Pin(self.PINS[2],Pin.OUT)#13

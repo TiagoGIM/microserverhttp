@@ -1,4 +1,4 @@
-from porteiroHardware import Trava
+from classes.porteiroHardware import Trava
 
 class Menu(Trava):
     kind = 'menu de funcoes admin'
